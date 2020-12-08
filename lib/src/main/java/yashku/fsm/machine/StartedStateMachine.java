@@ -2,7 +2,6 @@ package yashku.fsm.machine;
 
 import yashku.fsm.action.InternalStateTransitionAction;
 import yashku.fsm.action.PrimitiveAction;
-import yashku.fsm.action.SimpleAction;
 import yashku.fsm.action.StateTransitionAction;
 import yashku.fsm.entries.StateTransitionEntry;
 import yashku.fsm.entries.Transition;
@@ -50,7 +49,6 @@ class StartedStateMachine<T, A extends PrimitiveState, B extends PrimitiveEvent>
 
     private StateMachine<T> makeTransitionBasedOnEntry(StateTransitionEntry<A, A, B, PrimitiveAction<T>> entry) {
         PrimitiveAction<T> action = entry.getAction();
-
         T transitionOutput = executeProperAction(action, entry);
         return entry.getTo().is(StartedState.Any) ? StateMachine.empty() : new StartedStateMachine<>(entries, entry.getTo(), transitionOutput);
     }

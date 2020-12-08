@@ -8,6 +8,11 @@ import yashku.fsm.event.PrimitiveEvent;
 import yashku.fsm.state.PrimitiveState;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public interface StateMachine<T> {
 
@@ -29,7 +34,37 @@ public interface StateMachine<T> {
 
     T get();
 
+    default <U> Optional<U> mapOptional(Function<? super T, ? extends U> mapper) {
+        Objects.requireNonNull(mapper, "(mapper) is null");
+        return toOptional().map(mapper);
+    }
+
+    default Optional<T> toOptional() {
+        return Optional.of(get());
+    }
+
+    default <U> StateMachine<U> flatMap(Function<? super T, ? extends StateMachine<U>> mapper) {
+        Objects.requireNonNull(mapper, "(mapper) is null");
+        return mapper.apply(get());
+    }
+
     PrimitiveState getState();
+
+    default StateMachine<T> onTransitionDecline(Runnable sideEffect) {
+        return new StateMachineWithTransitionDeclineBehaviour<>(this, sideEffect);
+    }
+
+    default StateMachine<T> onException(Consumer<? super Exception> sideEffect) {
+        return new StateMachineWithExceptionBehaviour<>(this, sideEffect);
+    }
+
+    default StateMachine<T> onExceptionSuppress(Consumer<? super Exception> sideEffect) {
+        return new StateMachineWithSupressExceptionBehaviour<>(this, sideEffect);
+    }
+
+//    default StateMachine<T> onTransitionDecline(PrimitiveAction<T> action) {
+//        return new StateMachineWithTransitionDeclineBehaviour<>(this, action);
+//    }
 
     default StateMachine<T> newEvent(final PrimitiveEvent event) {
         return newEvent(new Transition(getState(), event));

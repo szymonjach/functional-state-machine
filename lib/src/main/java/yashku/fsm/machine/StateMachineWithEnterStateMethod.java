@@ -32,6 +32,9 @@ class StateMachineWithEnterStateMethod<T, A extends PrimitiveState> implements S
                 .filter(entry -> entry.getState().is(result.getState()))
                 .map(StateEnterEntry::getAction)
                 .forEach(Runnable::run);
+        if(result.equals(stateMachine)) {
+            return this;
+        }
         return new StateMachineWithEnterStateMethod<>(result, stateEntryActions);
     }
 }
