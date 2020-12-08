@@ -56,9 +56,7 @@ class StartedStateMachine<T, A extends PrimitiveState, B extends PrimitiveEvent>
     }
 
     private T executeProperAction(PrimitiveAction<T> action, StateTransitionEntry<? extends PrimitiveState, ? extends PrimitiveState, ? extends PrimitiveEvent, ? extends PrimitiveAction<T>> entry) {
-        if (action instanceof SimpleAction) {
-            return action.run();
-        } else if (action instanceof StateTransitionAction) {
+        if (action instanceof StateTransitionAction) {
             return ((StateTransitionAction<PrimitiveState, PrimitiveState, PrimitiveEvent, T>) action).run(entry.getFrom(), entry.getTo(), entry.getEvent(), get());
         } else if (action instanceof InternalStateTransitionAction) {
             return ((InternalStateTransitionAction<PrimitiveState, PrimitiveState, PrimitiveEvent, T>) action).run(entry.getFrom(), entry.getTo(), entry.getEvent(), this).get();

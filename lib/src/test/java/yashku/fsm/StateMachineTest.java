@@ -42,9 +42,9 @@ class StateMachineTest {
     void testSimpleScenarioWithCustomStatesAndEvents() {
         var transitions = List.of(
                 StateTransitionEntry.of(CustomState.Start, S1, Start, PrimitiveAction.ofTransition(this::startEvent)),
-                StateTransitionEntry.of(S1, S2, EventA, PrimitiveAction.ofTransition(this::fromS1ToS2OnEventA)),
-                StateTransitionEntry.of(S2, S1, EventA, PrimitiveAction.ofTransition(this::fromS1ToS2OnEventA))
-//                StateTransitionEntry.of(S1, S2, EventA, PrimitiveAction.ofInternalTransition(this::fromS1ToS2OnEventAWithInternalTransition))
+//                StateTransitionEntry.of(S1, S2, EventA, PrimitiveAction.ofTransition(this::fromS1ToS2OnEventA)),
+                StateTransitionEntry.of(S2, S1, EventA, PrimitiveAction.ofTransition(this::fromS1ToS2OnEventA)),
+                StateTransitionEntry.of(S1, S2, EventA, PrimitiveAction.ofInternalTransition(this::fromS1ToS2OnEventAWithInternalTransition))
         );
 
         var sideEffectsOnEntry = List.of(
