@@ -8,14 +8,14 @@ import yashku.fsm.state.PrimitiveState;
 
 import java.util.List;
 
-public class StateMachineBuilderWithDefinedEntryCallMethods<A extends PrimitiveState, T> {
-    private final List<StateEnterEntry<A, PrimitiveAction<T>>> stateEnterEntries;
+public class StateMachineBuilderWithDefinedEntryCallMethods<A extends PrimitiveState> {
+    private final List<StateEnterEntry<A>> stateEnterEntries;
 
-    public StateMachineBuilderWithDefinedEntryCallMethods(List<StateEnterEntry<A, PrimitiveAction<T>>> stateEnterEntries) {
+    StateMachineBuilderWithDefinedEntryCallMethods(List<StateEnterEntry<A>> stateEnterEntries) {
         this.stateEnterEntries = stateEnterEntries;
     }
 
-    public <B extends PrimitiveEvent> StateMachine<T> withDefinition(List<StateTransitionEntry<A, A, B, PrimitiveAction<T>>> entries) {
+    public <B extends PrimitiveEvent, T> StateMachine<T> withDefinition(List<StateTransitionEntry<A, A, B, PrimitiveAction<T>>> entries) {
         return StateMachine.withDefinition(entries, stateEnterEntries);
     }
 }

@@ -10,24 +10,31 @@ import yashku.fsm.event.PrimitiveEvent;
 import yashku.fsm.state.PrimitiveState;
 import yashku.fsm.state.StartedState;
 
-import java.util.Optional;
 import java.util.stream.StreamSupport;
 
 class StartedStateMachine<T, A extends PrimitiveState, B extends PrimitiveEvent> implements StateMachine<T> {
     private final Iterable<StateTransitionEntry<A, A, B, PrimitiveAction<T>>> entries;
+    private final T value;
+    private final PrimitiveState state;
 
-    public StartedStateMachine(Iterable<StateTransitionEntry<A, A, B, PrimitiveAction<T>>> entries) {
+    StartedStateMachine(Iterable<StateTransitionEntry<A, A, B, PrimitiveAction<T>>> entries) {
+        this(entries, entries.iterator().next().getFrom().getStartState(), null);
+    }
+
+    private StartedStateMachine(Iterable<StateTransitionEntry<A, A, B, PrimitiveAction<T>>> entries, PrimitiveState state, T value) {
         this.entries = entries;
+        this.value = value;
+        this.state = state;
     }
 
     @Override
     public T get() {
-        return null;
+        return value;
     }
 
     @Override
     public PrimitiveState getState() {
-        return entries.iterator().next().getFrom().getStartState();
+        return state;
     }
 
     @Override
@@ -45,7 +52,7 @@ class StartedStateMachine<T, A extends PrimitiveState, B extends PrimitiveEvent>
         PrimitiveAction<T> action = entry.getAction();
 
         T transitionOutput = executeProperAction(action, entry);
-        return entry.getTo().is(StartedState.Any) ? StateMachine.empty() : new TransitionedStateMachine<>(entry.getTo(), transitionOutput, Optional.of(this));
+        return entry.getTo().is(StartedState.Any) ? StateMachine.empty() : new StartedStateMachine<>(entries, entry.getTo(), transitionOutput);
     }
 
     private T executeProperAction(PrimitiveAction<T> action, StateTransitionEntry<? extends PrimitiveState, ? extends PrimitiveState, ? extends PrimitiveEvent, ? extends PrimitiveAction<T>> entry) {

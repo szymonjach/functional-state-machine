@@ -6,6 +6,10 @@ import yashku.fsm.state.StartedState;
 
 class EmptyStateMachine<T> implements StateMachine<T> {
 
+    EmptyStateMachine() {
+
+    }
+
     @Override
     public T get() {
         return null;

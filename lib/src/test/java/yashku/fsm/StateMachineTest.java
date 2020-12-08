@@ -2,6 +2,7 @@ package yashku.fsm;
 
 import org.junit.jupiter.api.Test;
 import yashku.fsm.action.PrimitiveAction;
+import yashku.fsm.entries.StateEnterEntry;
 import yashku.fsm.entries.StateTransitionEntry;
 import yashku.fsm.event.PrimitiveEvent;
 import yashku.fsm.machine.StateMachine;
@@ -41,15 +42,21 @@ class StateMachineTest {
     void testSimpleScenarioWithCustomStatesAndEvents() {
         var transitions = List.of(
                 StateTransitionEntry.of(CustomState.Start, S1, Start, PrimitiveAction.ofTransition(this::startEvent)),
-//                StateTransitionEntry.of(S1, S2, EventA, PrimitiveAction.ofTransition(this::fromS1ToS2OnEventA)),
-                StateTransitionEntry.of(S2, S1, EventA, PrimitiveAction.ofTransition(this::fromS1ToS2OnEventA)),
-                StateTransitionEntry.of(S1, S2, EventA, PrimitiveAction.ofInternalTransition(this::fromS1ToS2OnEventAWithInternalTransition))
+                StateTransitionEntry.of(S1, S2, EventA, PrimitiveAction.ofTransition(this::fromS1ToS2OnEventA)),
+                StateTransitionEntry.of(S2, S1, EventA, PrimitiveAction.ofTransition(this::fromS1ToS2OnEventA))
+//                StateTransitionEntry.of(S1, S2, EventA, PrimitiveAction.ofInternalTransition(this::fromS1ToS2OnEventAWithInternalTransition))
         );
 
-        StateMachine<String> stateMachine = StateMachine.withDefinition(transitions)
+        var sideEffectsOnEntry = List.of(
+                StateEnterEntry.of(S2, () -> System.out.println("--\nSide effect xD\n--"))
+        );
+
+        StateMachine<String> stateMachine = StateMachine
+                .withSideEffectWhenEntersState(sideEffectsOnEntry)
+                .withDefinition(transitions)
                 .newEvent(Start)
+                .newEvent(EventA)
                 .newEvent(EventA);
-//                .newEvent(EventA);
 
         assertEquals("ala", stateMachine.get());
     }

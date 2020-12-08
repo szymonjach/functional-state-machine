@@ -8,19 +8,18 @@ import yashku.fsm.event.PrimitiveEvent;
 import yashku.fsm.state.PrimitiveState;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface StateMachine<T> {
 
-//    public static <S extends PrimitiveState, A extends PrimitiveAction<T>, T> StateMachine<T> withSideEffectWhenEntersState(List<StateEnterEntry<S, A>> entries) {
-//        return
-//    }
+    static <S extends PrimitiveState> StateMachineBuilderWithDefinedEntryCallMethods<S> withSideEffectWhenEntersState(List<StateEnterEntry<S>> entries) {
+        return new StateMachineBuilderWithDefinedEntryCallMethods<>(entries);
+    }
 
     static <A extends PrimitiveState, B extends PrimitiveEvent, T> StateMachine<T> withDefinition(List<StateTransitionEntry<A, A, B, PrimitiveAction<T>>> entries) {
         return new StartedStateMachine<>(entries);
     }
 
-    static <A extends PrimitiveState, B extends PrimitiveEvent, T> StateMachine<T> withDefinition(List<StateTransitionEntry<A, A, B, PrimitiveAction<T>>> entries, List<StateEnterEntry<A, PrimitiveAction<T>>> stateEnterEntries) {
+    static <A extends PrimitiveState, B extends PrimitiveEvent, T> StateMachine<T> withDefinition(List<StateTransitionEntry<A, A, B, PrimitiveAction<T>>> entries, List<StateEnterEntry<A>> stateEnterEntries) {
         return new StateMachineWithEnterStateMethod<>(withDefinition(entries), stateEnterEntries);
     }
 
