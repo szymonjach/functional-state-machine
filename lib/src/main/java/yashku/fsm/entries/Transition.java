@@ -1,4 +1,7 @@
-package yashku.fsm;
+package yashku.fsm.entries;
+
+import yashku.fsm.event.PrimitiveEvent;
+import yashku.fsm.state.PrimitiveState;
 
 public class Transition {
     private final PrimitiveState fromState;

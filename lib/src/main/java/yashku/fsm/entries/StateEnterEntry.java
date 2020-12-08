@@ -1,4 +1,7 @@
-package yashku.fsm;
+package yashku.fsm.entries;
+
+import yashku.fsm.action.PrimitiveAction;
+import yashku.fsm.state.PrimitiveState;
 
 public class StateEnterEntry<S extends PrimitiveState, A extends PrimitiveAction<?>> {
 

@@ -1,4 +1,4 @@
-package yashku.fsm;
+package yashku.fsm.event;
 
 public interface PrimitiveEvent {
     default boolean is(PrimitiveEvent other) {

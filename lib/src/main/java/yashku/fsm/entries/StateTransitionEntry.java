@@ -1,7 +1,10 @@
-package yashku.fsm;
+package yashku.fsm.entries;
+
+import yashku.fsm.action.PrimitiveAction;
+import yashku.fsm.event.PrimitiveEvent;
+import yashku.fsm.state.PrimitiveState;
 
 import java.util.Objects;
-import java.util.Optional;
 
 public class StateTransitionEntry<F extends PrimitiveState, T extends PrimitiveState, E extends PrimitiveEvent, A extends PrimitiveAction<?>> {
 
