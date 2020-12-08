@@ -5,7 +5,7 @@ import yashku.fsm.state.PrimitiveState;
 
 import java.util.Optional;
 
-class TransitionedStateMachine<T> extends StateMachine<T> {
+class TransitionedStateMachine<T> implements StateMachine<T> {
 
     private final T transitionOutput;
     private final PrimitiveState state;

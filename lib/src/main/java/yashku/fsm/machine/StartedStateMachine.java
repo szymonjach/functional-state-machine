@@ -13,7 +13,7 @@ import yashku.fsm.state.StartedState;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
 
-class StartedStateMachine<T, A extends PrimitiveState, B extends PrimitiveEvent> extends StateMachine<T> {
+class StartedStateMachine<T, A extends PrimitiveState, B extends PrimitiveEvent> implements StateMachine<T> {
     private final Iterable<StateTransitionEntry<A, A, B, PrimitiveAction<T>>> entries;
 
     public StartedStateMachine(Iterable<StateTransitionEntry<A, A, B, PrimitiveAction<T>>> entries) {
@@ -45,7 +45,7 @@ class StartedStateMachine<T, A extends PrimitiveState, B extends PrimitiveEvent>
         PrimitiveAction<T> action = entry.getAction();
 
         T transitionOutput = executeProperAction(action, entry);
-        return entry.getTo().is(StartedState.Any) ? empty() : new TransitionedStateMachine<>(entry.getTo(), transitionOutput, Optional.of(this));
+        return entry.getTo().is(StartedState.Any) ? StateMachine.empty() : new TransitionedStateMachine<>(entry.getTo(), transitionOutput, Optional.of(this));
     }
 
     private T executeProperAction(PrimitiveAction<T> action, StateTransitionEntry<? extends PrimitiveState, ? extends PrimitiveState, ? extends PrimitiveEvent, ? extends PrimitiveAction<T>> entry) {

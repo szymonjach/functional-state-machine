@@ -4,7 +4,7 @@ import yashku.fsm.entries.Transition;
 import yashku.fsm.state.PrimitiveState;
 import yashku.fsm.state.StartedState;
 
-class EmptyStateMachine<T> extends StateMachine<T> {
+class EmptyStateMachine<T> implements StateMachine<T> {
 
     @Override
     public T get() {

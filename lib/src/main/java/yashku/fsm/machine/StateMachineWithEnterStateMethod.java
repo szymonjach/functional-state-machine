@@ -8,7 +8,7 @@ import yashku.fsm.state.PrimitiveState;
 
 import java.util.stream.StreamSupport;
 
-class StateMachineWithEnterStateMethod<T, A extends PrimitiveState> extends StateMachine<T> {
+class StateMachineWithEnterStateMethod<T, A extends PrimitiveState> implements StateMachine<T> {
     private final Iterable<StateEnterEntry<A, PrimitiveAction<T>>> stateEntryActions;
     private final StateMachine<T> stateMachine;
 
