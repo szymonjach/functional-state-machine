@@ -7,3 +7,5 @@ build
 .idea
 
 functional-state-machine.iml
+
+lib/out
