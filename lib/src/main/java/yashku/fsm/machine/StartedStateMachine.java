@@ -9,6 +9,8 @@ import yashku.fsm.event.PrimitiveEvent;
 import yashku.fsm.state.PrimitiveState;
 import yashku.fsm.state.StartedState;
 
+import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.StreamSupport;
 
 class StartedStateMachine<T, A extends PrimitiveState, B extends PrimitiveEvent> implements StateMachine<T> {
@@ -29,6 +31,12 @@ class StartedStateMachine<T, A extends PrimitiveState, B extends PrimitiveEvent>
     @Override
     public T get() {
         return value;
+    }
+
+    @Override
+    public StateMachine<T> map(Function<? super T, ? extends T> mapper) {
+        Objects.requireNonNull(mapper, "(mapper) is null");
+        return new StartedStateMachine<>(entries, getState(), mapper.apply(get()));
     }
 
     @Override

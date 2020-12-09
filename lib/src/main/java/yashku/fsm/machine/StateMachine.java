@@ -12,7 +12,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public interface StateMachine<T> {
 
@@ -42,6 +41,8 @@ public interface StateMachine<T> {
     default Optional<T> toOptional() {
         return Optional.of(get());
     }
+
+    StateMachine<T> map(Function<? super T, ? extends T> mapper);
 
     default <U> StateMachine<U> flatMap(Function<? super T, ? extends StateMachine<U>> mapper) {
         Objects.requireNonNull(mapper, "(mapper) is null");

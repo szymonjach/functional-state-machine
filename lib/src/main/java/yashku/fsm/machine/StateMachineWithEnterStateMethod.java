@@ -4,6 +4,8 @@ import yashku.fsm.entries.StateEnterEntry;
 import yashku.fsm.entries.Transition;
 import yashku.fsm.state.PrimitiveState;
 
+import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.StreamSupport;
 
 class StateMachineWithEnterStateMethod<T, A extends PrimitiveState> implements StateMachine<T> {
@@ -18,6 +20,12 @@ class StateMachineWithEnterStateMethod<T, A extends PrimitiveState> implements S
     @Override
     public T get() {
         return stateMachine.get();
+    }
+
+    @Override
+    public StateMachine<T> map(Function<? super T, ? extends T> mapper) {
+        Objects.requireNonNull(mapper, "(mapper) is null");
+        return new StateMachineWithEnterStateMethod<>(stateMachine.map(mapper), stateEntryActions);
     }
 
     @Override

@@ -6,6 +6,7 @@ import yashku.fsm.state.StartedState;
 
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class StateMachineWithExceptionBehaviour<T> implements StateMachine<T> {
     private final Consumer<? super Exception> sideEffect;
@@ -25,6 +26,12 @@ public class StateMachineWithExceptionBehaviour<T> implements StateMachine<T> {
     @Override
     public T get() {
         throw new StateMachineException(exception);
+    }
+
+    @Override
+    public StateMachine<T> map(Function<? super T, ? extends T> mapper) {
+        Objects.requireNonNull(mapper, "(mapper) is null");
+        return new StateMachineWithExceptionBehaviour<>(stateMachine.map(mapper), sideEffect, exception);
     }
 
     @Override

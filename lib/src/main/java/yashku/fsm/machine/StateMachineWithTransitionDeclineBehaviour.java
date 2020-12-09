@@ -3,11 +3,14 @@ package yashku.fsm.machine;
 import yashku.fsm.entries.Transition;
 import yashku.fsm.state.PrimitiveState;
 
+import java.util.Objects;
+import java.util.function.Function;
+
 public class StateMachineWithTransitionDeclineBehaviour<T> implements StateMachine<T> {
     private final Runnable sideEffect;
     private final StateMachine<T> stateMachine;
 
-    public StateMachineWithTransitionDeclineBehaviour(StateMachine<T> stateMachine, Runnable sideEffect) {
+    StateMachineWithTransitionDeclineBehaviour(StateMachine<T> stateMachine, Runnable sideEffect) {
         this.stateMachine = stateMachine;
         this.sideEffect = sideEffect;
     }
@@ -15,6 +18,12 @@ public class StateMachineWithTransitionDeclineBehaviour<T> implements StateMachi
     @Override
     public T get() {
         return stateMachine.get();
+    }
+
+    @Override
+    public StateMachine<T> map(Function<? super T, ? extends T> mapper) {
+        Objects.requireNonNull(mapper, "(mapper) is null");
+        return new StateMachineWithTransitionDeclineBehaviour<>(stateMachine.map(mapper), sideEffect);
     }
 
     @Override
