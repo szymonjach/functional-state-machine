@@ -36,8 +36,8 @@ public class StateMachineWithTransitionDeclineBehaviour<T> implements StateMachi
         var result = stateMachine.newEvent(transition);
         if(result.equals(stateMachine)) {
             sideEffect.run();
-            return this;
+            return new StateMachineWithTransitionDeclineBehaviour<>(stateMachine, sideEffect);
         }
-        return new StateMachineWithTransitionDeclineBehaviour<>(result, sideEffect);
+        return result.equals(stateMachine) ? this : new StateMachineWithTransitionDeclineBehaviour<>(result, sideEffect);
     }
 }

@@ -18,13 +18,18 @@ repositories {
 
 dependencies {
     // Use JUnit Jupiter API for testing.
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
 
     // Use JUnit Jupiter Engine for testing.
     testImplementation 'org.junit.jupiter:junit-jupiter-engine'
 }
 
-tasks.named('test') {
-    // Use junit platform for unit tests.
+test {
     useJUnitPlatform()
+    reports.html.enabled = true
 }
+
+//tasks.named('test') {
+//    // Use junit platform for unit tests.
+//    useJUnitPlatform()
+//}

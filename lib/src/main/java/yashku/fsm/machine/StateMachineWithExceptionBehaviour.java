@@ -25,6 +25,9 @@ public class StateMachineWithExceptionBehaviour<T> implements StateMachine<T> {
 
     @Override
     public T get() {
+        if(Objects.isNull(exception)) {
+            return null;
+        }
         throw new StateMachineException(exception);
     }
 
@@ -36,14 +39,14 @@ public class StateMachineWithExceptionBehaviour<T> implements StateMachine<T> {
 
     @Override
     public PrimitiveState getState() {
-        return StartedState.Unknown;
+        return stateMachine.getState();
     }
 
     @Override
     public StateMachine<T> newEvent(Transition transition) {
         StateMachine<T> result;
         if(Objects.nonNull(exception)) {
-            throw new StateMachineException(exception);
+            return new StateMachineWithExceptionBehaviour<>(stateMachine, sideEffect, exception);
         }
 
         try {

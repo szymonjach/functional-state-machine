@@ -1,21 +1,24 @@
 package yashku.fsm;
 
+import org.junit.jupiter.api.DisplayNameGeneration;
+import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import yashku.fsm.action.PrimitiveAction;
 import yashku.fsm.entries.StateEnterEntry;
 import yashku.fsm.entries.StateTransitionEntry;
 import yashku.fsm.event.PrimitiveEvent;
+import yashku.fsm.function.Function4;
 import yashku.fsm.machine.StateMachine;
 import yashku.fsm.state.PrimitiveState;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static yashku.fsm.StateMachineTest.CustomEvent.EventA;
-import static yashku.fsm.StateMachineTest.CustomEvent.Start;
-import static yashku.fsm.StateMachineTest.CustomState.S1;
-import static yashku.fsm.StateMachineTest.CustomState.S2;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class StateMachineTest {
 
     enum CustomState implements PrimitiveState {
@@ -38,68 +41,89 @@ class StateMachineTest {
         EventC
     }
 
+    private final AtomicReference<Function4<CustomState, CustomState, CustomEvent, String, String>> startEvent = new AtomicReference<>();
+    private final AtomicReference<Function4<CustomState, CustomState, CustomEvent, String, String>> transitionAction = new AtomicReference<>();
+
+    List<StateTransitionEntry<CustomState, CustomState, CustomEvent, PrimitiveAction<String>>> transitions = List.of(
+            StateTransitionEntry.of(CustomState.Start, CustomState.S1, CustomEvent.Start, PrimitiveAction.<CustomState, CustomState, CustomEvent, String>ofTransition((s1, s2, e, s) -> startEvent.get().apply(s1, s2, e, s))),
+            StateTransitionEntry.of(CustomState.S1, CustomState.S2, CustomEvent.EventA, PrimitiveAction.<CustomState, CustomState, CustomEvent, String>ofTransition((s1, s2, e, s) -> transitionAction.get().apply(s1, s2, e, s))),
+            StateTransitionEntry.of(CustomState.S2, CustomState.S3, CustomEvent.EventB, PrimitiveAction.<CustomState, CustomState, CustomEvent, String>ofTransition((s1, s2, e, s) -> transitionAction.get().apply(s1, s2, e, s))),
+            StateTransitionEntry.of(CustomState.S3, CustomState.S4, CustomEvent.EventC, PrimitiveAction.<CustomState, CustomState, CustomEvent, String>ofTransition((s1, s2, e, s) -> transitionAction.get().apply(s1, s2, e, s))),
+            StateTransitionEntry.of(CustomState.S4, CustomState.S1, CustomEvent.EventC, PrimitiveAction.<CustomState, CustomState, CustomEvent, String>ofTransition((s1, s2, e, s) -> transitionAction.get().apply(s1, s2, e, s)))
+    );
+
     @Test
-    void testSimpleScenarioWithCustomStatesAndEvents() {
-        var transitions = List.of(
-                StateTransitionEntry.of(CustomState.Start, S1, Start, PrimitiveAction.ofTransition(this::startEvent)),
-                StateTransitionEntry.of(S1, S2, EventA, PrimitiveAction.ofTransition(this::fromS1ToS2OnEventA)),
-                StateTransitionEntry.of(S2, S1, EventA, PrimitiveAction.ofTransition(this::fromS1ToS2OnEventA))
-//                StateTransitionEntry.of(S1, S2, EventA, PrimitiveAction.ofInternalTransition(this::fromS1ToS2OnEventAWithInternalTransition))
+    void simple_transition_is_working_fine() {
+        startEvent.set((s1, s2, e, o) -> "");
+        transitionAction.set((s1, s2, e, o) -> "");
+
+        StateMachine<String> stateMachine = StateMachine.withDefinition(transitions)
+                .newEvent(CustomEvent.Start);
+
+        assertEquals(CustomState.S1, stateMachine.getState());
+    }
+
+    @Test
+    void one_transition_is_able_to_produce_value_which_is_passed_to_the_second_transition() {
+        startEvent.set((s1, s2, e, o) -> "something");
+        transitionAction.set((s1, s2, e, o) -> o + " more");
+
+        StateMachine<String> stateMachine = StateMachine.withDefinition(transitions)
+                .newEvent(CustomEvent.Start)
+                .newEvent(CustomEvent.EventA);
+
+        assertEquals("something more", stateMachine.get());
+    }
+
+    @Test
+    void state_machine_is_immutable() {
+        startEvent.set((s1, s2, e, o) -> "something");
+        transitionAction.set((s1, s2, e, o) -> o + " more");
+
+        StateMachine<String> stateMachine = StateMachine.withDefinition(transitions);
+        var stateMachineAfterStartEvent = stateMachine.newEvent(CustomEvent.Start);
+        var stateMachineAfterStartEventAndEventA = stateMachineAfterStartEvent.newEvent(CustomEvent.EventA);
+
+        assertEquals(CustomState.Start, stateMachine.getState());
+        assertEquals(CustomState.S1, stateMachineAfterStartEvent.getState());
+        assertEquals(CustomState.S2, stateMachineAfterStartEventAndEventA.getState());
+    }
+
+    @Test
+    void arguments_in_transitions_are_as_expected() {
+        AtomicReference<CustomState> fromState = new AtomicReference<>();
+        AtomicReference<CustomState> toState = new AtomicReference<>();
+        AtomicReference<CustomEvent> event = new AtomicReference<>();
+
+        startEvent.set((s1, s2, e, o) -> {
+            fromState.set(s1);
+            toState.set(s2);
+            event.set(e);
+            return "empty";
+        });
+        transitionAction.set((s1, s2, e, o) -> o + " output");
+
+        StateMachine.withDefinition(transitions).newEvent(CustomEvent.Start);
+
+        assertEquals(CustomState.Start, fromState.get());
+        assertEquals(CustomState.S1, toState.get());
+        assertEquals(CustomEvent.Start, event.get());
+    }
+
+    @Test
+    void side_effect_on_entry_state_is_executed() {
+        AtomicBoolean atomicBoolean = new AtomicBoolean(false);
+
+        System.out.println("ala ma kota");
+        startEvent.set((s1, s2, e, o) -> "empty");
+        transitionAction.set((s1, s2, e, o) -> o + " output");
+
+        var entryStateSideEffects = List.of(
+                StateEnterEntry.of(CustomState.S1, () -> atomicBoolean.set(true))
         );
 
-        var sideEffectsOnEntry = List.of(
-                StateEnterEntry.of(CustomState.S3, () -> System.out.println("--\nSide effect xD\n--"))
-        );
+        StateMachine.withSideEffectWhenEntersState(entryStateSideEffects).withDefinition(transitions).newEvent(CustomEvent.Start);
 
-        StateMachine<String> stateMachine = StateMachine
-                .withSideEffectWhenEntersState(sideEffectsOnEntry)
-                .withDefinition(transitions)
-                .newEvent(Start)
-                .onTransitionDecline(() -> System.out.println("LOOO KURWA ODRZUCONA TRANZYCJA!!!!!!!!!!!!!"))
-                .onException(e -> System.out.println(e.toString()))
-                .onExceptionSuppress(e -> System.out.println("IT IS AFTER TRYING TO SUPRESS " + e.toString()))
-                .newEvent(EventA)
-                .newEvent(EventA)
-                .newEvent(EventA)
-                .newEvent(EventA)
-                .newEvent(EventA);
-
-        stateMachine.get();
-
-//                .newEvent(EventA)
-//                .newEvent(CustomEvent.EventB)
-//                .newEvent(EventA)
-//                .newEvent(EventA)
-//                .newEvent(EventA);
-
-//        assertEquals("ala", stateMachine.get());
-    }
-
-    private String startEvent(CustomState from, CustomState to, CustomEvent event, String context) {
-        System.out.println(from);
-        System.out.println(to);
-        System.out.println(event);
-        System.out.println(context);
-        System.out.println("\n---\n");
-        return null;
-    }
-
-    private String fromS1ToS2OnEventA(CustomState from, CustomState to, CustomEvent event, String context) {
-        System.out.println("from: " + from);
-        System.out.println("to: " + to);
-        System.out.println("event: " + event);
-        System.out.println("context: " + context);
-        System.out.println("\n---\n");
-        throw new RuntimeException("ala ma kota");
-//        return "ala";
-    }
-
-    private StateMachine<String> fromS1ToS2OnEventAWithInternalTransition(CustomState from, CustomState to, CustomEvent event, StateMachine<String> context) {
-        System.out.println("from: " + from);
-        System.out.println("to: " + to);
-        System.out.println("event: " + event);
-        System.out.println("context: " + context);
-        System.out.println("\n---\n");
-        return context.newEvent(EventA);
+        assertTrue(atomicBoolean.get(), "Side effect was not executed");
     }
 }
